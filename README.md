@@ -48,7 +48,9 @@ python -m src.rag_graph "how much does the team plan cost?"   # ask a question
 - [x] **Day 0** — repo, deps, fake knowledge base (34 docs), env + config
 - [x] **Week 1 Day 1** — first LangGraph graph (state, nodes, edges)
 - [x] **Week 1 Day 3–4** — RAG node (FAISS retrieval + grounded answer)
-- [ ] Week 1 Day 5 — self-correcting retrieval (conditional edge)
+- [x] **Week 1 Day 5** — self-correcting retrieval (conditional edge): the
+      agent grades its own retrieval and rewrites the query up to twice
+      before answering, instead of always answering after one pass.
 - [ ] Week 1 Day 6–7 — Langfuse tracing
 - [ ] Week 2 — tools, ReAct loop, memory, guardrails, FastAPI
 - [ ] Week 3 — evals, Cloud Run deploy, publish

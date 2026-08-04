@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Secrets
+.env
+
+# Local data / state
+*.sqlite
+*.sqlite3
+*.db
+knowledge_base/index/   # built FAISS index (regenerated from docs)
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

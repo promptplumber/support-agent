@@ -1,6 +1,6 @@
 # Core agent framework
 langgraph==1.2.10
-langgraph-checkpoint-sqlite==2.0.11   # SQLite memory (used in Week 2)
+langgraph-checkpoint-sqlite==3.1.1   # SQLite memory (used in Week 2)
 
 # LLM client
 langchain-openai==1.4.1
@@ -14,6 +14,7 @@ fastapi==0.141.1
 uvicorn==0.52.0
 python-dotenv==1.2.2
 
-# Retrieval (added in Week 1 Day 3 when we build the RAG node)
-# sentence-transformers>=3.0
-# faiss-cpu>=1.8
+# Retrieval (Week 1 Day 3 — the RAG node)
+sentence-transformers>=3.0
+faiss-cpu>=1.8
+numpy>=1.26

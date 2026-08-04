@@ -36,6 +36,9 @@ pip install -r requirements.txt
 python scripts/build_kb.py           # generate the knowledge base
 cp .env.example .env                 # then fill in your keys
 python -m src.hello_graph            # Week 1 Day 1 hello-world graph
+
+python -m src.retrieval              # build the FAISS index (once)
+python -m src.rag_graph "how much does the team plan cost?"   # ask a question
 ```
 
 ---
@@ -44,7 +47,7 @@ python -m src.hello_graph            # Week 1 Day 1 hello-world graph
 
 - [x] **Day 0** — repo, deps, fake knowledge base (34 docs), env + config
 - [x] **Week 1 Day 1** — first LangGraph graph (state, nodes, edges)
-- [ ] Week 1 Day 3–4 — RAG node
+- [x] **Week 1 Day 3–4** — RAG node (FAISS retrieval + grounded answer)
 - [ ] Week 1 Day 5 — self-correcting retrieval (conditional edge)
 - [ ] Week 1 Day 6–7 — Langfuse tracing
 - [ ] Week 2 — tools, ReAct loop, memory, guardrails, FastAPI

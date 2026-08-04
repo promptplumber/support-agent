@@ -26,6 +26,7 @@ from langgraph.graph import StateGraph, START, END
 
 from . import config
 from .rag_graph import answer, get_llm, get_retriever, _format_context
+from .tracing import run_traced, tracing_enabled
 
 
 # ---------------------------------------------------------------------------
@@ -137,14 +138,19 @@ def build_graph():
 def main():
     question = " ".join(sys.argv[1:]) or "How do I reset my password?"
     graph = build_graph()
-    result = graph.invoke({
-        "question": question,
-        "chunks": [],
-        "answer": "",
-        "attempts": 0,
-        "retrieval_ok": False,
-        "path": [],
-    })
+    result, trace_id = run_traced(
+        graph,
+        {
+            "question": question,
+            "chunks": [],
+            "answer": "",
+            "attempts": 0,
+            "retrieval_ok": False,
+            "path": [],
+        },
+        tags=["week1", "agent"],
+        metadata={"input_question": question, "model": config.ANSWER_MODEL},
+    )
 
     print("Q (original):", question)
     print("Q (final):   ", result["question"])
@@ -157,6 +163,10 @@ def main():
     # path itself -- but it's always the node that ends the graph, so we can
     # append it here for a trace that matches what actually ran.
     print("Path:", " -> ".join(result["path"] + ["answer"]))
+    if trace_id:
+        print(f"\nTrace: {trace_id}  (open it in your Langfuse dashboard)")
+    elif not tracing_enabled():
+        print("\nTracing disabled (set LANGFUSE_* in .env)")
 
 
 if __name__ == "__main__":

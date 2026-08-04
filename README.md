@@ -51,6 +51,7 @@ python -m src.rag_graph "how much does the team plan cost?"   # ask a question
 - [x] **Week 1 Day 5** — self-correcting retrieval (conditional edge): the
       agent grades its own retrieval and rewrites the query up to twice
       before answering, instead of always answering after one pass.
-- [ ] Week 1 Day 6–7 — Langfuse tracing
+- [x] **Week 1 Day 6–7** — Langfuse tracing: every run is traced (per-node
+      spans, tokens, latency, cost).
 - [ ] Week 2 — tools, ReAct loop, memory, guardrails, FastAPI
 - [ ] Week 3 — evals, Cloud Run deploy, publish

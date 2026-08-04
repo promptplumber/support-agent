@@ -10,9 +10,14 @@ venv/
 
 # Local data / state
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal
 *.sqlite3
 *.db
-knowledge_base/index/   # built FAISS index (regenerated from docs)
+# built FAISS index (regenerated from docs)
+knowledge_base/index/
+# local escalation log (Week 2 tools)
+data/escalations.log
 
 # OS / editor
 .DS_Store

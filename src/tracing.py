@@ -41,30 +41,40 @@ def get_handler():
 
 
 def run_traced(graph, inputs, *, trace_name="support-agent", session_id=None,
-                tags=None, metadata=None):
+                tags=None, metadata=None, config=None):
     """Invoke `graph` and, if Langfuse is configured, wrap the run in one trace.
+
+    `config` is passed through to `graph.invoke` as-is (e.g. a checkpointer's
+    `configurable.thread_id`) -- tracing only adds its own callback handler
+    on top, it never replaces what the caller needs.
 
     Returns (result, trace_id). trace_id is None when tracing is disabled or
     anything about tracing itself goes wrong -- a Langfuse problem should
     never take down the agent, so any failure here just falls back to a
     plain untraced invoke.
     """
+    base_config = dict(config or {})
+
     if not tracing_enabled():
-        return graph.invoke(inputs), None
+        return graph.invoke(inputs, config=base_config), None
 
     try:
         from langfuse import get_client, propagate_attributes
 
         handler = get_handler()
+        traced_config = {
+            **base_config,
+            "callbacks": [*base_config.get("callbacks", []), handler],
+        }
         with propagate_attributes(
             trace_name=trace_name,
             session_id=session_id,
             tags=tags,
             metadata=metadata,
         ):
-            result = graph.invoke(inputs, config={"callbacks": [handler]})
+            result = graph.invoke(inputs, config=traced_config)
         get_client().flush()  # CLI is short-lived -- flush now or traces never send
         return result, handler.last_trace_id
     except Exception as e:
         print(f"Tracing failed ({e}); falling back to an untraced run.")
-        return graph.invoke(inputs), None
+        return graph.invoke(inputs, config=base_config), None

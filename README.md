@@ -53,5 +53,8 @@ python -m src.rag_graph "how much does the team plan cost?"   # ask a question
       before answering, instead of always answering after one pass.
 - [x] **Week 1 Day 6–7** — Langfuse tracing: every run is traced (per-node
       spans, tokens, latency, cost).
-- [ ] Week 2 — tools, ReAct loop, memory, guardrails, FastAPI
+- [x] **Week 2 Part 1** — tools (docs/tickets/escalate) + prebuilt ReAct
+      agent + SQLite short-term memory: tool choice and per-thread memory
+      are both demonstrated live.
+- [ ] Week 2 Part 2 — hand-rolled ReAct loop, guardrails, FastAPI
 - [ ] Week 3 — evals, Cloud Run deploy, publish

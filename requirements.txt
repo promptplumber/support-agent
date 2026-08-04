@@ -14,6 +14,7 @@ langchain==1.3.14   # langfuse.langchain.CallbackHandler imports this at runtime
 fastapi==0.141.1
 uvicorn==0.52.0
 python-dotenv==1.2.2
+requests==2.34.2   # escalate_to_human's optional Slack webhook (Week 2)
 
 # Retrieval (Week 1 Day 3 — the RAG node)
 sentence-transformers>=3.0

@@ -56,5 +56,8 @@ python -m src.rag_graph "how much does the team plan cost?"   # ask a question
 - [x] **Week 2 Part 1** — tools (docs/tickets/escalate) + prebuilt ReAct
       agent + SQLite short-term memory: tool choice and per-thread memory
       are both demonstrated live.
-- [ ] Week 2 Part 2 — hand-rolled ReAct loop, guardrails, FastAPI
+- [x] Week 2 Part 2a — hand-rolled ReAct loop (agent/tools/should_continue,
+      step-cap escalation)
+- [ ] Week 2 Part 2b — guardrails (low-confidence escalation, off-topic refusal)
+- [ ] Week 2 Part 2c — FastAPI service + minimal chat UI
 - [ ] Week 3 — evals, Cloud Run deploy, publish

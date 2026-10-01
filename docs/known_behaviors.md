@@ -11,3 +11,8 @@
   history likely influenced it. Not a reliable result.
 - Decision: system prompt intentionally left unchanged for now. Add this case
   to the Week 3 eval set (expected tool: `escalate_to_human`) and measure.
+
+### Measured in the Week 3 eval (2026-10-02)
+Escalation bucket: 2/5 correct. Escalated: e2 (teammate charge), e5 (GDPR).
+Answered from docs without escalating: e1 (refund after 20 days), e3 (leaked API key),
+e4 (lost 2FA device). Prompt left unchanged; see `eval_report.md`.

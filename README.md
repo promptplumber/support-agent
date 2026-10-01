@@ -60,4 +60,6 @@ python -m src.rag_graph "how much does the team plan cost?"   # ask a question
       step-cap escalation)
 - [x] Week 2 Part 2b — guardrails (low-confidence escalation, off-topic refusal)
 - [x] Week 2 Part 2c — FastAPI service + minimal chat UI
-- [ ] Week 3 — evals, Cloud Run deploy, publish
+- [x] Week 3a — evaluation harness + results (`src/eval.py`, `eval_report.md`)
+- [ ] Week 3b — Cloud Run deploy artifacts + deploy
+- [ ] Week 3c — README polish, publish

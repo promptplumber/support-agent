@@ -23,3 +23,5 @@ data/escalations.log
 .DS_Store
 .idea/
 .vscode/
+# eval run output (raw per-question results; the committed summary is eval_report.md)
+data/eval_results.json

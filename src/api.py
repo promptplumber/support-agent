@@ -19,12 +19,16 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
+import openai
 from langchain_core.messages import AIMessage
 from langgraph.checkpoint.sqlite import SqliteSaver
 from pydantic import BaseModel, Field
 
 from .react_agent import build_graph
 from .tracing import run_traced
+
+# Shown when OpenAI refuses the call (budget spent, rate limited, ...).
+OUT_OF_JUICE = "ghee khtm $$"
 
 INDEX_HTML = Path(__file__).parent / "static" / "index.html"
 
@@ -93,14 +97,19 @@ def chat(body: ChatRequest, request: Request) -> dict:
     prior = graph.get_state(config)
     prior_count = len(prior.values.get("messages", [])) if prior.values else 0
 
-    result, trace_id = run_traced(
-        graph,
-        {"messages": [{"role": "user", "content": body.message}], "steps": 0},
-        trace_name="react-agent",
-        session_id=body.session_id,
-        tags=["api"],
-        config=config,
-    )
+    try:
+        result, trace_id = run_traced(
+            graph,
+            {"messages": [{"role": "user", "content": body.message}], "steps": 0},
+            trace_name="react-agent",
+            session_id=body.session_id,
+            tags=["api"],
+            config=config,
+        )
+    except openai.OpenAIError:
+        # Rate limit, spent budget, bad key... whatever OpenAI rejected, show a
+        # friendly message instead of a bare 500.
+        raise HTTPException(status_code=503, detail=OUT_OF_JUICE)
 
     new_messages = result["messages"][prior_count:]
     tools_used = [

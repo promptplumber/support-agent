@@ -15,6 +15,8 @@ from __future__ import annotations
 
 import os
 
+import openai
+
 
 def _is_placeholder(value: str) -> bool:
     # .env.example ships "pk-lf-..." / "sk-lf-..." -- a real key never has
@@ -75,6 +77,8 @@ def run_traced(graph, inputs, *, trace_name="support-agent", session_id=None,
             result = graph.invoke(inputs, config=traced_config)
         get_client().flush()  # CLI is short-lived -- flush now or traces never send
         return result, handler.last_trace_id
+    except openai.OpenAIError:
+        raise  # a model/quota error isn't a tracing problem; don't re-run the graph
     except Exception as e:
         print(f"Tracing failed ({e}); falling back to an untraced run.")
         return graph.invoke(inputs, config=base_config), None

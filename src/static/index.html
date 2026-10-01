@@ -59,7 +59,12 @@
         body: JSON.stringify({ session_id: sessionId, message }),
       });
       if (!res.ok) {
-        add("bot", res.status === 429 ? "Too many requests - please wait a moment." : "Something went wrong (" + res.status + ").");
+        // Show the server's own message when it sent one (e.g. the 503 "out of budget" text).
+        let detail = "";
+        try { detail = (await res.json()).detail; } catch (e) {}
+        add("bot", typeof detail === "string" && detail ? detail
+            : res.status === 429 ? "Too many requests - please wait a moment."
+            : "Something went wrong (" + res.status + ").");
       } else {
         const data = await res.json();
         const tools = data.tools_used.length ? "tools: " + data.tools_used.join(", ") : "no tools";

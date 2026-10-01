@@ -9,8 +9,9 @@ explainable. The pattern (ReAct = Reason + Act):
 
 As a graph that's just two nodes in a cycle:
 
-    agent -> (wants a tool?) -> tools -> agent -> ... -> (done) -> END
-                             -> (too many rounds?) -> escalate -> END
+    guardrail -> (off-topic?) -> refuse -> END
+              -> agent -> (wants a tool?) -> tools -> agent -> ... -> (done) -> END
+                                          -> (too many rounds?) -> escalate -> END
 
 Run:  python -m src.react_agent "I was charged for a teammate who left, what now?"
 """
@@ -60,6 +61,7 @@ SYSTEM = (
 class AgentState(TypedDict):
     messages: Annotated[list, add_messages]
     steps: int
+    on_topic: bool   # set by the guardrail node each turn
 
 
 # ---------------------------------------------------------------------------
@@ -71,6 +73,41 @@ class AgentState(TypedDict):
 @lru_cache(maxsize=1)
 def get_model_with_tools():
     return get_llm().bind_tools(TOOLS)
+
+
+# ---------------------------------------------------------------------------
+# Node 0: guardrail -- refuse off-topic questions BEFORE spending tool calls
+# ---------------------------------------------------------------------------
+# One cheap, temp-0 LLM call per question. That's the price of a reliable
+# "must refuse" guarantee: relying on the main agent's prompt alone is softer.
+GUARD_PROMPT = (
+    "Is this question about the Nimbus product or its support (accounts, billing, "
+    "features, how-tos, issues)? A follow-up about the ongoing support conversation "
+    "counts as yes. Answer only yes or no.\n\n"
+)
+
+REFUSAL = (
+    "I can only help with questions about Nimbus and your account. "
+    "I can't help with that one."
+)
+
+
+def guardrail_node(state: AgentState) -> dict:
+    humans = [m.content for m in state["messages"] if getattr(m, "type", None) == "human"]
+    question = humans[-1] if humans else ""
+    # Show the previous user turn too, so short follow-ups ("what did I just ask?")
+    # aren't mistaken for off-topic.
+    context = f"Previous user message: {humans[-2]}\n" if len(humans) > 1 else ""
+    verdict = get_llm().invoke(GUARD_PROMPT + context + f"Question: {question}").content
+    return {"on_topic": verdict.strip().lower().startswith("yes")}
+
+
+def route_guardrail(state: AgentState) -> str:
+    return "ok" if state.get("on_topic", True) else "off_topic"
+
+
+def refuse_node(state: AgentState) -> dict:
+    return {"messages": [AIMessage(content=REFUSAL)]}
 
 
 # ---------------------------------------------------------------------------
@@ -96,8 +133,12 @@ def tool_node(state: AgentState) -> dict:
     last = state["messages"][-1]        # the AIMessage that requested tools
     results = []
     for call in last.tool_calls:        # each: {"name", "args", "id"}
-        tool = TOOLS_BY_NAME[call["name"]]
-        output = tool.invoke(call["args"])
+        # If a tool throws, hand the error to the model as a tool result instead of
+        # crashing the graph -- it can then retry, try another tool, or escalate.
+        try:
+            output = TOOLS_BY_NAME[call["name"]].invoke(call["args"])
+        except Exception as e:
+            output = f"ERROR from {call['name']}: {e}. Try a different tool or escalate."
         results.append(ToolMessage(content=str(output), tool_call_id=call["id"]))
     # Append the results AND count this as one completed tool round.
     return {"messages": results, "steps": state.get("steps", 0) + 1}
@@ -145,11 +186,17 @@ def _first_user_text(state: AgentState) -> str:
 # ---------------------------------------------------------------------------
 def build_graph(checkpointer=None):
     builder = StateGraph(AgentState)
+    builder.add_node("guardrail", guardrail_node)
+    builder.add_node("refuse", refuse_node)
     builder.add_node("agent", agent_node)
     builder.add_node("tools", tool_node)
     builder.add_node("escalate", escalate_node)
 
-    builder.add_edge(START, "agent")
+    builder.add_edge(START, "guardrail")
+    builder.add_conditional_edges(
+        "guardrail", route_guardrail, {"ok": "agent", "off_topic": "refuse"},
+    )
+    builder.add_edge("refuse", END)
     # After the agent speaks, should_continue picks the route:
     builder.add_conditional_edges(
         "agent", should_continue,

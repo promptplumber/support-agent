@@ -59,5 +59,5 @@ python -m src.rag_graph "how much does the team plan cost?"   # ask a question
 - [x] Week 2 Part 2a — hand-rolled ReAct loop (agent/tools/should_continue,
       step-cap escalation)
 - [x] Week 2 Part 2b — guardrails (low-confidence escalation, off-topic refusal)
-- [ ] Week 2 Part 2c — FastAPI service + minimal chat UI
+- [x] Week 2 Part 2c — FastAPI service + minimal chat UI
 - [ ] Week 3 — evals, Cloud Run deploy, publish

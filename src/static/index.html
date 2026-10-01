@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nimbus support agent</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+  #log { border: 1px solid #ccc; border-radius: 8px; height: 60vh; overflow-y: auto; padding: .75rem; }
+  .msg { margin: .5rem 0; white-space: pre-wrap; }
+  .user { text-align: right; color: #0b5; }
+  .bot { color: #222; }
+  .meta { font-size: .75rem; color: #888; }
+  form { display: flex; gap: .5rem; margin-top: .75rem; }
+  input { flex: 1; padding: .6rem; font-size: 1rem; }
+  button { padding: .6rem 1rem; font-size: 1rem; }
+</style>
+</head>
+<body>
+<h2>Nimbus support agent</h2>
+<div id="log"></div>
+<form id="form">
+  <input id="box" autocomplete="off" placeholder="Ask a question..." autofocus>
+  <button id="send">Send</button>
+</form>
+<script>
+  // One random id per page load, kept only in memory (no localStorage): a new tab
+  // or a refresh starts a fresh conversation.
+  const sessionId = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
+  const log = document.getElementById("log");
+  const box = document.getElementById("box");
+  const send = document.getElementById("send");
+
+  function add(cls, text, meta) {
+    const d = document.createElement("div");
+    d.className = "msg " + cls;
+    d.textContent = text;           // textContent, never innerHTML: replies are untrusted text
+    if (meta) {
+      const m = document.createElement("div");
+      m.className = "meta";
+      m.textContent = meta;
+      d.appendChild(m);
+    }
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  document.getElementById("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const message = box.value.trim();
+    if (!message) return;
+    box.value = "";
+    add("user", message);
+    send.disabled = true;
+    try {
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, message }),
+      });
+      if (!res.ok) {
+        add("bot", res.status === 429 ? "Too many requests - please wait a moment." : "Something went wrong (" + res.status + ").");
+      } else {
+        const data = await res.json();
+        const tools = data.tools_used.length ? "tools: " + data.tools_used.join(", ") : "no tools";
+        add("bot", data.answer, tools);
+      }
+    } catch (err) {
+      add("bot", "Could not reach the server.");
+    }
+    send.disabled = false;
+    box.focus();
+  });
+</script>
+</body>
+</html>

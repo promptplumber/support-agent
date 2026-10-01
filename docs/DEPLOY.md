@@ -78,8 +78,13 @@ torch and the embedding model.
 ## 4. Verify
 
 ```bash
-curl <SERVICE_URL>/healthz        # expect {"status":"ok"}
+curl -s -X POST <SERVICE_URL>/chat -H 'content-type: application/json' \
+  -d '{"session_id":"check","message":"how much does the team plan cost?"}'
 ```
+
+Expect a JSON answer with `"tools_used":["search_docs"]`. (Don't use `/healthz` on
+Cloud Run: Google's front end reserves that path on `*.run.app` URLs and returns its
+own 404 before the request reaches the app. The app's `/healthz` works locally.)
 
 Then open `<SERVICE_URL>/` in a browser and ask a question. `<SERVICE_URL>` is
 printed at the end of `gcloud run deploy`.

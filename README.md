@@ -8,8 +8,7 @@ Langfuse and measured with an eval harness.
 **Stack:** LangGraph · hand-rolled ReAct loop · SQLite memory · Langfuse tracing ·
 agent evals · FastAPI · GCP Cloud Run.
 
-> Status: **deploy artifacts ready, not yet deployed.** See [Live demo](#live-demo)
-> and [docs/DEPLOY.md](docs/DEPLOY.md).
+> Status: **deployed** — see [Live demo](#live-demo).
 
 ## What it does
 
@@ -112,10 +111,11 @@ Real outputs from the eval run.
 
 ## Live demo
 
-Live URL: _(add after deploy)_
+Live URL: <https://support-agent-947244085653.us-central1.run.app>
 
-Deploy steps are in [docs/DEPLOY.md](docs/DEPLOY.md). The container image is prepared
-but has not been deployed yet.
+Deployed on Cloud Run (`us-central1`, scale-to-zero, max 1 instance, 10 requests/min/IP).
+The first request after idle is a slow cold start, and conversation memory is not
+durable across restarts. Deploy steps: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Run it locally
 
@@ -156,5 +156,5 @@ python -m src.eval
 - [x] Week 2 Part 2b — guardrails (off-topic refusal gate, tool-error handling)
 - [x] Week 2 Part 2c — FastAPI service + minimal chat UI
 - [x] Week 3a — evaluation harness + results (`src/eval.py`, `eval_report.md`)
-- [x] Week 3b — Cloud Run deploy artifacts (Dockerfile, runbook); deploy itself is a manual step
+- [x] Week 3b — Cloud Run deploy (Dockerfile, runbook, live service)
 - [x] Week 3c — README (overview, architecture diagram, eval table, examples)

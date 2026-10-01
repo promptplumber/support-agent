@@ -1,0 +1,17 @@
+.venv
+.git
+.gitignore
+.DS_Store
+__pycache__
+*.pyc
+# secrets and local state: never ship these
+.env
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+data/escalations.log
+data/eval_results.json
+# rebuilt inside the image
+knowledge_base/index
+# scratch / planning docs
+docs/*_brief.md

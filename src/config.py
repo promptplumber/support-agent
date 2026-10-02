@@ -20,6 +20,11 @@ INDEX_DIR = KB_DIR / "index"              # built FAISS index (gitignored)
 # The answer model. gpt-4.1-mini is the default; swap in .env to test others.
 ANSWER_MODEL = os.getenv("ANSWER_MODEL", "gpt-4.1-mini")
 
+# Ceiling on tokens the model may WRITE per call. Answers are short, so this only
+# stops a manipulated or runaway generation from burning money; one-word calls
+# (the guardrail's yes/no) stay short on their own.
+MAX_ANSWER_TOKENS = int(os.getenv("MAX_ANSWER_TOKENS", "500"))
+
 # The embedding model used for retrieval. bge-small is small, fast, and good.
 EMBED_MODEL = os.getenv("EMBED_MODEL", "BAAI/bge-small-en-v1.5")
 

@@ -46,7 +46,10 @@ def get_llm():
     config.require_openai_key()
     # temperature=0 -> as deterministic as possible. For support answers we want
     # the safe, consistent response every time, not creative variety.
-    return ChatOpenAI(model=config.ANSWER_MODEL, temperature=0)
+    # max_tokens is a ceiling on output length, not a target.
+    return ChatOpenAI(
+        model=config.ANSWER_MODEL, temperature=0, max_tokens=config.MAX_ANSWER_TOKENS
+    )
 
 
 # ---------------------------------------------------------------------------

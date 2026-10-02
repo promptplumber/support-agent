@@ -154,6 +154,8 @@ python -m src.eval
 - [x] Week 2 Part 2a — hand-rolled ReAct loop (agent/tools/should_continue,
       step-cap escalation)
 - [x] Week 2 Part 2b — guardrails (off-topic refusal gate, tool-error handling)
+      Plus input/output length caps and prompt-injection–resistant system prompt
+      (data vs. instructions separation).
 - [x] Week 2 Part 2c — FastAPI service + minimal chat UI
 - [x] Week 3a — evaluation harness + results (`src/eval.py`, `eval_report.md`)
 - [x] Week 3b — Cloud Run deploy (Dockerfile, runbook, live service)

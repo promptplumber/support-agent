@@ -32,6 +32,9 @@ OUT_OF_JUICE = "ghee khtm $$"
 
 INDEX_HTML = Path(__file__).parent / "static" / "index.html"
 
+# Reject oversized messages BEFORE any LLM call, so a huge paste costs zero tokens.
+MAX_MESSAGE_CHARS = int(os.getenv("MAX_MESSAGE_CHARS", "4000"))
+
 # Per-IP rate limit: stops a stranger from draining the OpenAI key.
 RATE_LIMIT = int(os.getenv("RATE_LIMIT_PER_MIN", "30"))
 WINDOW_S = 60
@@ -63,8 +66,9 @@ app = FastAPI(title="support-agent", lifespan=lifespan)
 
 class ChatRequest(BaseModel):
     session_id: str = Field(min_length=1, max_length=100)
-    # Cap the length too: an enormous message is just a way to burn tokens.
-    message: str = Field(min_length=1, max_length=2000)
+    # Length is capped in the /chat handler (413), not here: a pydantic max_length
+    # would answer 422 and could disagree with MAX_MESSAGE_CHARS.
+    message: str = Field(min_length=1)
 
 
 def _client_ip(request: Request) -> str:
@@ -88,6 +92,9 @@ def check_rate_limit(ip: str) -> None:
 
 @app.post("/chat")
 def chat(body: ChatRequest, request: Request) -> dict:
+    # First check, before the rate limiter, guardrail, tools or any model call.
+    if len(body.message) > MAX_MESSAGE_CHARS:
+        raise HTTPException(status_code=413, detail="Message too long.")
     check_rate_limit(_client_ip(request))
     graph = request.app.state.graph
     config = {"configurable": {"thread_id": body.session_id}}
